@@ -9,12 +9,15 @@ require (
 	github.com/urfave/cli/v3 v3.3.8
 )
 
-require github.com/go-viper/mapstructure/v2 v2.4.0
+require (
+	github.com/advancedlogic/GoOse v0.0.0-20231203033844-ae6b36caf275
+	github.com/go-viper/mapstructure/v2 v2.4.0
+	resty.dev/v3 v3.0.0-beta.3
+)
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/PuerkitoBio/goquery v1.4.1 // indirect
-	github.com/advancedlogic/GoOse v0.0.0-20231203033844-ae6b36caf275 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/araddon/dateparse v0.0.0-20180729174819-cfd92a431d0e // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
@@ -49,13 +52,12 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
-	resty.dev/v3 v3.0.0-beta.3 // indirect
 )
