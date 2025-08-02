@@ -1,12 +1,21 @@
 package main
 
-func CropText(input string) string {
-	const maxLength = 4096
+import "strings"
 
+func CropText(input string, length int) string {
 	runes := []rune(input)
-	if len(runes) <= maxLength {
+	if len(runes) <= length {
 		return input
 	}
 
-	return string(runes[:maxLength-3]) + "..."
+	return string(runes[:length-3]) + "..."
+}
+
+func ExtractAfterLastThinkTag(input string) string {
+	tag := "\n</think>\n\n"
+	idx := strings.LastIndex(input, tag)
+	if idx == -1 {
+		return strings.TrimSpace(input)
+	}
+	return strings.TrimSpace(input[idx+len(tag):])
 }
