@@ -1,0 +1,12 @@
+token: "discord_application_token"
+model: "qwen3:8b"
+whitelist:
+  - 79216925611139072
+ollamaServers:
+  - "http://localhost:11434"
+  - "http://192.168.1.58:11434"
+mcpServers:
+  general: "http://localhost:8089"
+templates:
+  system: "./system.tmpl"
+  user: "./user.tmpl"
