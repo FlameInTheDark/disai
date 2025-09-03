@@ -5,7 +5,7 @@ import "github.com/ilyakaznacheev/cleanenv"
 type Config struct {
 	Token         string            `yaml:"token" env:"DISCORD_TOKEN"`
 	MCPServers    map[string]string `yaml:"mcpServers"`
-	OllamaServers []string          `yaml:"ollamaServers"`
+	OllamaServers map[string]string `yaml:"ollamaServers"`
 	Model         string            `yaml:"model"`
 	Whitelist     []int64           `yaml:"whitelist"`
 	Templates     Templates         `yaml:"templates"`

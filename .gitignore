@@ -33,3 +33,4 @@ go.work.sum
 
 # config file
 config.yaml
+tool.yaml

@@ -68,6 +68,7 @@ func (c *Client) GetTools() map[string]*Tool {
 		tl, err := client.ListTools(context.Background(), nil)
 		if err != nil {
 			slog.Warn("Unable to get tools", slog.String("error", err.Error()), slog.String("mcp", n))
+			continue
 		}
 
 		for _, t := range tl.Tools {
