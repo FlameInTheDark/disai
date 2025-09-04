@@ -43,19 +43,32 @@ DisAI is a Discord bot that integrates with Ollama to provide AI capabilities to
 Create a `config.yaml` file based on the provided `config.example.yaml`:
 
 ```yaml
-token: "your_discord_application_token"
-model: "model_name"  # e.g., "qwen3:8b"
+token: "discord_application_token"
+model: "qwen3:8b" # Model name and revision
 whitelist:
-  - user_id_1  # Discord user IDs allowed to use the bot
-  - user_id_2
+  - 79216925611139072
+
+# Ollama servers (name: url)
 ollamaServers:
-  - "http://localhost:11434"  # List of Ollama server URLs
-  - "http://other-server:11434"
+  local: "http://localhost:11434"
+  remote: "http://192.168.1.58:11434"
+
+# MCP servers (name: url)
 mcpServers:
-  general: "http://localhost:8089"  # MCP server URL
+  general: "http://localhost:8089"
+
+# Templates for the model. Probably never going to change.
 templates:
-  system: "./system.tmpl"  # Path to system template
-  user: "./user.tmpl"  # Path to user template
+  system: "./system.tmpl"
+  user: "./user.tmpl"
+
+# Rename the original tool names to your own (original_tool_name: "This will be shown in the chat when tool called")
+toolNames:
+  search: "🔍 Searching web..."
+  jina_fetch_url: "🌐 Opening url with Jina.AI..."
+  fetch_url: "🌐 Opening url..."
+  get_weather_forecast: "⛅ Getting weather forecast..."
+
 ```
 
 ### Templates
@@ -102,6 +115,11 @@ The bot will process your message through the AI model and respond with the AI's
 
 ```bash
 go build -o disai ./cmd/disai
+```
+
+And if you need tools, for example:
+```bash
+go build -o tool ./cmd/tool
 ```
 
 ### TODO:
