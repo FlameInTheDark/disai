@@ -9,6 +9,7 @@ type Config struct {
 	Model         string            `yaml:"model"`
 	Whitelist     []int64           `yaml:"whitelist"`
 	Templates     Templates         `yaml:"templates"`
+	ToolNames     map[string]string `yaml:"toolNames"`
 }
 
 type Templates struct {

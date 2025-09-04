@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -15,6 +16,8 @@ const (
 	embedAuthorThinking = "Thinking..."
 	embedAuthorError    = "Error"
 )
+
+var emojiRegex = regexp.MustCompile(`^\p{So}`)
 
 // createEmbed builds a Discord embed with optional description and footer.
 func createEmbed(author, description, footerText string) *discordgo.MessageEmbed {
@@ -92,27 +95,26 @@ func (a *App) chatHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 
 	// Status callback to update Discord embed with accumulated history
 	statusCallback := func(status string) {
-		// Mark previous status as completed and add new current status
-		if len(statusHistory) > 0 {
-			// Convert last status from current (🔄) to completed (✅)
-			lastIdx := len(statusHistory) - 1
-			statusHistory[lastIdx] = strings.Replace(statusHistory[lastIdx], "🔄", "✅", 1)
+		// Add new status to the history
+		statusHistory = append(statusHistory, status)
+
+		// Create a display history
+		var displayHistory []string
+		for i, s := range statusHistory {
+			if i < len(statusHistory)-1 {
+				// Previous status, mark as completed
+				displayHistory = append(displayHistory, emojiRegex.ReplaceAllString(s, "✅"))
+			} else {
+				// Current status, display as is
+				displayHistory = append(displayHistory, s)
+			}
 		}
-
-		// Add new current status with progress indicator
-		currentStatus := strings.Replace(status, "📝", "🔄", 1)
-		currentStatus = strings.Replace(currentStatus, "🔍", "🔄", 1)
-		currentStatus = strings.Replace(currentStatus, "🤖", "🔄", 1)
-		currentStatus = strings.Replace(currentStatus, "🔧", "🔄", 1)
-		currentStatus = strings.Replace(currentStatus, "✨", "🔄", 1)
-
-		statusHistory = append(statusHistory, currentStatus)
 
 		elapsed := time.Since(start).Seconds()
 		footer := fmt.Sprintf("Elapsed: %.1fs", elapsed)
 
 		// Create description with all status history
-		description := strings.Join(statusHistory, "\n")
+		description := strings.Join(displayHistory, "\n")
 
 		// Show user request in embed title during processing
 		processingTitle := fmt.Sprintf("Processing: %s", CropText(userInput, 200))
@@ -139,7 +141,7 @@ func (a *App) chatHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	// Mark final status as completed
 	if len(statusHistory) > 0 {
 		lastIdx := len(statusHistory) - 1
-		statusHistory[lastIdx] = strings.Replace(statusHistory[lastIdx], "🔄", "✅", 1)
+		statusHistory[lastIdx] = emojiRegex.ReplaceAllString(statusHistory[lastIdx], "✅")
 	}
 
 	var result string

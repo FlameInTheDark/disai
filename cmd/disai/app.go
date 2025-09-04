@@ -20,7 +20,7 @@ type App struct {
 
 func NewApp(cfg config.Config) *App {
 	mcpClient := mcp.NewClient(cfg.MCPServers)
-	modelClient := model.NewModel(cfg.Model, cfg.OllamaServers, mcpClient, cfg.Templates.System, cfg.Templates.User)
+	modelClient := model.NewModel(cfg.Model, cfg.OllamaServers, mcpClient, cfg.Templates.System, cfg.Templates.User, cfg.ToolNames)
 
 	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {

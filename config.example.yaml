@@ -2,11 +2,24 @@ token: "discord_application_token"
 model: "qwen3:8b"
 whitelist:
   - 79216925611139072
+
+# Ollama servers (name: url)
 ollamaServers:
   local: "http://localhost:11434"
   remote: "http://192.168.1.58:11434"
+
+# MCP servers (name: url)
 mcpServers:
   general: "http://localhost:8089"
+
+# Templates for the model. Probably never going to change.
 templates:
   system: "./system.tmpl"
   user: "./user.tmpl"
+
+# Rename the original tool names to your own (original_tool_name: "This will be shown in the chat when tool called")
+toolNames:
+  search: "🔍 Searching web..."
+  jina_fetch_url: "🌐 Opening url with Jina.AI..."
+  fetch_url: "🌐 Opening url..."
+  get_weather_forecast: "⛅ Getting weather forecast..."
