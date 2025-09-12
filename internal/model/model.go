@@ -28,31 +28,6 @@ type Model struct {
 	userTpl   *template.Template
 }
 
-// statusTool wraps an ai.Tool to report usage via the status callback.
-type statusTool struct {
-	ai.Tool
-	displayName string
-	status      StatusCallback
-	turn        *int
-}
-
-func (t *statusTool) RunRaw(ctx context.Context, input any) (any, error) {
-	name := t.displayName
-	if name == "" {
-		raw := t.Tool.Name()
-		if parts := strings.SplitN(raw, "_", 2); len(parts) == 2 {
-			name = parts[1]
-		} else {
-			name = raw
-		}
-	}
-	if t.status != nil && t.turn != nil {
-		t.status(fmt.Sprintf("🔧 Turn %d: %s", *t.turn, name))
-		(*t.turn)++
-	}
-	return t.Tool.RunRaw(ctx, input)
-}
-
 // NewModel initialises Genkit with the Ollama plugin and connects MCP servers.
 // Only the first Ollama server URL is used as Genkit's Ollama plugin supports a
 // single server.
@@ -116,14 +91,36 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 		turn = 1
 		wrapped := make([]ai.Tool, len(tools))
 		for i, t := range tools {
-			toolName := t.Name()
-			display := m.ToolNames[toolName]
+			tool := t
+			def := t.Definition()
+			rawName := t.Name()
+			display := m.ToolNames[rawName]
 			if display == "" {
-				if parts := strings.SplitN(toolName, "_", 2); len(parts) == 2 {
+				if parts := strings.SplitN(rawName, "_", 2); len(parts) == 2 {
 					display = m.ToolNames[parts[1]]
 				}
+				if display == "" {
+					if parts := strings.SplitN(rawName, "_", 2); len(parts) == 2 {
+						display = parts[1]
+					} else {
+						display = rawName
+					}
+				}
 			}
-			wrapped[i] = &statusTool{Tool: t, displayName: display, status: status, turn: &turn}
+			disp := display
+
+			wrapped[i] = ai.NewToolWithInputSchema[any](
+				def.Name,
+				def.Description,
+				def.InputSchema,
+				func(tc *ai.ToolContext, input any) (any, error) {
+					if status != nil {
+						status(fmt.Sprintf("🔧 Turn %d: %s", turn, disp))
+						turn++
+					}
+					return tool.RunRaw(tc.Context, input)
+				},
+			)
 		}
 		tools = wrapped
 	}
