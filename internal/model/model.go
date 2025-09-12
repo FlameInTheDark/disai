@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"text/template"
 
 	"github.com/FlameInTheDark/disai/internal/mcp"
@@ -26,6 +27,26 @@ type Model struct {
 	userTpl   *template.Template
 }
 
+// statusTool wraps an ai.Tool to report usage via the status callback.
+type statusTool struct {
+	ai.Tool
+	displayName string
+	status      StatusCallback
+	turn        *int
+}
+
+func (t *statusTool) RunRaw(ctx context.Context, input any) (any, error) {
+	name := t.displayName
+	if name == "" {
+		name = t.Tool.Name()
+	}
+	if t.status != nil && t.turn != nil {
+		t.status(fmt.Sprintf("🔧 Turn %d: %s", *t.turn, name))
+		*t.turn++
+	}
+	return t.Tool.RunRaw(ctx, input)
+}
+
 // NewModel initialises Genkit with the Ollama plugin and connects MCP servers.
 // Only the first Ollama server URL is used as Genkit's Ollama plugin supports a
 // single server.
@@ -38,13 +59,13 @@ func NewModel(modelName string, servers map[string]string, mcpc *mcp.Client, sys
 	ctx := context.Background()
 	o := &ollama.Ollama{ServerAddress: serverURL}
 	g := genkit.Init(ctx, genkit.WithPlugins(o), genkit.WithDefaultModel("ollama/"+modelName))
-        o.DefineModel(g, ollama.ModelDefinition{Name: modelName, Type: "chat"}, &ai.ModelOptions{
-                Supports: &ai.ModelSupports{
-                        Multiturn:  true,
-                        SystemRole: true,
-                        Tools:      true,
-                },
-        })
+	o.DefineModel(g, ollama.ModelDefinition{Name: modelName, Type: "chat"}, &ai.ModelOptions{
+		Supports: &ai.ModelSupports{
+			Multiturn:  true,
+			SystemRole: true,
+			Tools:      true,
+		},
+	})
 
 	m := &Model{
 		name:      modelName,
@@ -82,6 +103,17 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 	tools, err := m.mcp.GetTools(ctx, m.g)
 	if err != nil {
 		return "", err
+	}
+
+	var turn int
+	if status != nil {
+		turn = 1
+		wrapped := make([]ai.Tool, len(tools))
+		for i, t := range tools {
+			name := m.ToolNames[t.Name()]
+			wrapped[i] = &statusTool{Tool: t, displayName: name, status: status, turn: &turn}
+		}
+		tools = wrapped
 	}
 
 	if status != nil {
