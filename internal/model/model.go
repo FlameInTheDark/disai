@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/FlameInTheDark/disai/internal/mcp"
@@ -38,11 +39,16 @@ type statusTool struct {
 func (t *statusTool) RunRaw(ctx context.Context, input any) (any, error) {
 	name := t.displayName
 	if name == "" {
-		name = t.Tool.Name()
+		raw := t.Tool.Name()
+		if parts := strings.SplitN(raw, "_", 2); len(parts) == 2 {
+			name = parts[1]
+		} else {
+			name = raw
+		}
 	}
 	if t.status != nil && t.turn != nil {
 		t.status(fmt.Sprintf("🔧 Turn %d: %s", *t.turn, name))
-		*t.turn++
+		(*t.turn)++
 	}
 	return t.Tool.RunRaw(ctx, input)
 }
@@ -110,8 +116,14 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 		turn = 1
 		wrapped := make([]ai.Tool, len(tools))
 		for i, t := range tools {
-			name := m.ToolNames[t.Name()]
-			wrapped[i] = &statusTool{Tool: t, displayName: name, status: status, turn: &turn}
+			toolName := t.Name()
+			display := m.ToolNames[toolName]
+			if display == "" {
+				if parts := strings.SplitN(toolName, "_", 2); len(parts) == 2 {
+					display = m.ToolNames[parts[1]]
+				}
+			}
+			wrapped[i] = &statusTool{Tool: t, displayName: display, status: status, turn: &turn}
 		}
 		tools = wrapped
 	}
