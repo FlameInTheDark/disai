@@ -6,6 +6,8 @@ import (
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	gmcp "github.com/firebase/genkit/go/plugins/mcp"
+
+	"github.com/FlameInTheDark/disai/internal/config"
 )
 
 // Client wraps a Genkit MCP manager for interacting with MCP servers.
@@ -14,14 +16,20 @@ type Client struct {
 	clients []*gmcp.GenkitMCPClient
 }
 
-// NewClient creates MCP clients for all provided servers using the streamable HTTP transport.
-func NewClient(servers map[string]string) *Client {
+// NewClient creates MCP clients for all provided servers using the configured transport.
+func NewClient(servers map[string]config.MCPServer) *Client {
 	var cls []*gmcp.GenkitMCPClient
-	for name, url := range servers {
-		cl, err := gmcp.NewGenkitMCPClient(gmcp.MCPClientOptions{
-			Name:           name,
-			StreamableHTTP: &gmcp.StreamableHTTPConfig{BaseURL: url},
-		})
+	for name, srv := range servers {
+		opts := gmcp.MCPClientOptions{Name: name}
+		switch {
+		case srv.URL != "":
+			opts.StreamableHTTP = &gmcp.StreamableHTTPConfig{BaseURL: srv.URL}
+		case srv.Command != "":
+			opts.Stdio = &gmcp.StdioConfig{Command: srv.Command, Args: srv.Args, Env: srv.Env}
+		default:
+			continue
+		}
+		cl, err := gmcp.NewGenkitMCPClient(opts)
 		if err != nil {
 			panic(err)
 		}

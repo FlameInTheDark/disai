@@ -53,9 +53,15 @@ ollamaServers:
   local: "http://localhost:11434"
   remote: "http://192.168.1.58:11434"
 
-# MCP servers (name: url)
+# MCP servers (supports HTTP and stdio transports)
 mcpServers:
-  general: "http://localhost:8089"
+  # HTTP-based MCP server
+  general:
+    url: "http://localhost:8089"
+  # Stdio-based MCP server
+  local:
+    command: "./tool"
+    args: []
 
 # Templates for the model. Probably never going to change.
 templates:
