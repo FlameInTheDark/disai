@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"text/template"
 
@@ -113,7 +112,7 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 				def.InputSchema,
 				func(tc *ai.ToolContext, input any) (any, error) {
 					if status != nil {
-						status(fmt.Sprintf("🔧 %s", disp))
+						status(disp)
 					}
 					return tool.RunRaw(tc.Context, input)
 				},
