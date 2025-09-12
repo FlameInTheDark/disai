@@ -69,13 +69,13 @@ func (a *App) chatHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	// Validate input once
 	if len(i.ApplicationCommandData().Options) == 0 {
 		slog.Warn("No message provided")
-		a.errorResponse(s, i)
+		a.errorResponse(s, i, "No message provided")
 		return
 	}
 	userInput := strings.TrimSpace(i.ApplicationCommandData().Options[0].StringValue())
 	if userInput == "" {
 		slog.Warn("No message provided")
-		a.errorResponse(s, i)
+		a.errorResponse(s, i, "No message provided")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (a *App) chatHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	}, statusCallback)
 	if err != nil {
 		slog.Error("Unable to chat", slog.String("error", err.Error()))
-		errorEmbed := createEmbed(embedAuthorError, "", "")
+		errorEmbed := createEmbed(embedAuthorError, err.Error(), "")
 		if err := sendInteractionResponseEdit(s, i, errorEmbed); err != nil {
 			return
 		}
@@ -168,7 +168,7 @@ func (a *App) thinkingResponse(s *discordgo.Session, i *discordgo.InteractionCre
 	return sendInteractionResponse(s, i, thinkingEmbed, discordgo.MessageFlagsLoading)
 }
 
-func (a *App) errorResponse(s *discordgo.Session, i *discordgo.InteractionCreate) error {
-	errorEmbed := createEmbed(embedAuthorError, "", "")
+func (a *App) errorResponse(s *discordgo.Session, i *discordgo.InteractionCreate, description string) error {
+	errorEmbed := createEmbed(embedAuthorError, description, "")
 	return sendInteractionResponse(s, i, errorEmbed, discordgo.MessageFlagsLoading)
 }
