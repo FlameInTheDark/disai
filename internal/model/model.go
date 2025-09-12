@@ -86,9 +86,7 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 		return "", err
 	}
 
-	var turn int
 	if status != nil {
-		turn = 1
 		wrapped := make([]ai.Tool, len(tools))
 		for i, t := range tools {
 			tool := t
@@ -115,8 +113,7 @@ func (m *Model) ChatWithStatus(ctx context.Context, message string, args map[str
 				def.InputSchema,
 				func(tc *ai.ToolContext, input any) (any, error) {
 					if status != nil {
-						status(fmt.Sprintf("🔧 Turn %d: %s", turn, disp))
-						turn++
+						status(fmt.Sprintf("🔧 %s", disp))
 					}
 					return tool.RunRaw(tc.Context, input)
 				},
