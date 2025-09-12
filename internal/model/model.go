@@ -38,7 +38,13 @@ func NewModel(modelName string, servers map[string]string, mcpc *mcp.Client, sys
 	ctx := context.Background()
 	o := &ollama.Ollama{ServerAddress: serverURL}
 	g := genkit.Init(ctx, genkit.WithPlugins(o), genkit.WithDefaultModel("ollama/"+modelName))
-	o.DefineModel(g, ollama.ModelDefinition{Name: modelName, Type: "chat"}, nil)
+        o.DefineModel(g, ollama.ModelDefinition{Name: modelName, Type: "chat"}, &ai.ModelOptions{
+                Supports: &ai.ModelSupports{
+                        Multiturn:  true,
+                        SystemRole: true,
+                        Tools:      true,
+                },
+        })
 
 	m := &Model{
 		name:      modelName,
